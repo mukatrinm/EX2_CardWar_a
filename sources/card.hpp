@@ -1,9 +1,13 @@
 #pragma once
 
-class card
+namespace ariel
 {
-private:
-public:
-    card();
-    ~card();
-};
+    class card
+    {
+    private:
+    public:
+        card();
+        ~card();
+    };
+} // namespace ariel
+

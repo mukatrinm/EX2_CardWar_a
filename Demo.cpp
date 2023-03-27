@@ -9,12 +9,13 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-using namespace std;
 
 #include "sources/player.hpp"
 #include "sources/game.hpp"
 #include "sources/card.hpp"
-// using namespace ariel;
+
+using namespace std;
+using namespace ariel;
 
 int main() {
   // Create two players with their names 

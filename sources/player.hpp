@@ -1,14 +1,19 @@
 #pragma once
 
 #include <string>
-class Player
+
+namespace ariel
 {
-private:
+    class Player
+    {
+    private:
 
-public:
-    Player(std::string name);
-    ~Player();
+    public:
+        Player(std::string name);
+        ~Player();
 
-    int stacksize();
-    int cardesTaken();
-};
+        int stacksize();
+        int cardesTaken();
+    };  
+}
+

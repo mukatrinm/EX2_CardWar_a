@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+using namespace ariel;
+
 Game::Game(Player p1, Player p2)
 {
 }
