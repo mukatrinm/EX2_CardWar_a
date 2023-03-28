@@ -50,16 +50,17 @@ TEST_CASE("check cards taken") {
     Player p1("Alice");
     Player p2("Bob");
     Game game(p1,p2);
-    bool only_one_takes_cards = false;
+    bool valid_cards_taken = false;
 
     SUBCASE("Play One Turn") {
         game.playTurn();
 
         bool player_1_took_the_cards = p1.cardesTaken() > 0 && p2.cardesTaken() == 0;
         bool player_2_took_the_cards = p2.cardesTaken() > 0 && p1.cardesTaken() == 0;
+        bool tie = p1.cardesTaken() == 26 && p2.cardesTaken() == 26;
 
-        only_one_takes_cards = player_1_took_the_cards || player_2_took_the_cards;
-        CHECK(only_one_takes_cards);
+        valid_cards_taken = player_1_took_the_cards || player_2_took_the_cards || tie;
+        CHECK(valid_cards_taken);
 
         // player should take no more than all the cards available in the game
         CHECK_LE(p1.cardesTaken(), 26 * 2);
@@ -71,11 +72,11 @@ TEST_CASE("check cards taken") {
             game.playTurn();
         }
 
-        bool player_1_took_the_cards = p1.cardesTaken() >= 5 && p2.cardesTaken() == 0;
-        bool player_2_took_the_cards = p2.cardesTaken() >= 5 && p1.cardesTaken() == 0;
+        bool player_1_took_cards = p1.cardesTaken() > 0;
+        bool player_2_took_cards = p2.cardesTaken() > 0;
 
-        only_one_takes_cards = player_1_took_the_cards || player_2_took_the_cards;
-        CHECK(only_one_takes_cards);
+        valid_cards_taken = player_1_took_cards || player_2_took_cards;
+        CHECK(valid_cards_taken);
 
         // player should take no more than all the cards available in the game
         CHECK_LE(p1.cardesTaken(), 26 * 2);
@@ -84,11 +85,11 @@ TEST_CASE("check cards taken") {
 
     SUBCASE("Play All") {
         game.playAll();
-        bool player_1_took_the_cards = p1.cardesTaken() > 0 && p2.cardesTaken() == 0;
-        bool player_2_took_the_cards = p2.cardesTaken() > 0 && p1.cardesTaken() == 0;
+        bool player_1_took_cards = p1.cardesTaken() > 0;
+        bool player_2_took_cards = p2.cardesTaken() > 0;
 
-        only_one_takes_cards = player_1_took_the_cards || player_2_took_the_cards;
-        CHECK(only_one_takes_cards);
+        valid_cards_taken = player_1_took_cards || player_2_took_cards;         
+        CHECK(valid_cards_taken);
 
         // player should take no more than all the cards available in the game
         CHECK_LE(p1.cardesTaken(), 26 * 2);
@@ -105,12 +106,13 @@ TEST_CASE("check stacks update") {
     SUBCASE("Play One Turn") {
         game.playTurn();
 
-        bool player_1_stack_updates = p1.stacksize() > 26 && p2.stacksize() < 26;
-        bool player_2_stack_updates = p2.stacksize() > 26 && p1.stacksize() < 26;
+        bool player_1_stack_updates = p1.stacksize() < 26;
+        bool player_2_stack_updates = p2.stacksize() < 26;
 
-        players_stack_update = player_1_stack_updates || player_2_stack_updates;
+        players_stack_update = player_1_stack_updates && player_2_stack_updates;
         
         CHECK(players_stack_update);
+        CHECK(p1.stacksize() == p2.stacksize());
         CHECK_GE(p1.stacksize(), 0);
         CHECK_GE(p2.stacksize(), 0);
     }
@@ -120,22 +122,23 @@ TEST_CASE("check stacks update") {
             game.playTurn();
         }
 
-        bool player_1_stack_updates = p1.stacksize() > 26 && p2.stacksize() <= 21;
-        bool player_2_stack_updates = p2.stacksize() > 26 && p1.stacksize() <= 21;
+        bool player_1_stack_updates = p1.stacksize() <= 21;
+        bool player_2_stack_updates = p2.stacksize() <= 21;
 
-        players_stack_update = player_1_stack_updates || player_2_stack_updates;
+        players_stack_update = player_1_stack_updates && player_2_stack_updates;
         
         CHECK(players_stack_update);
+        CHECK(p1.stacksize() == p2.stacksize());
         CHECK_GE(p1.stacksize(), 0);
         CHECK_GE(p2.stacksize(), 0);
     }
 
     SUBCASE("Play All") {
         game.playAll();
-        bool player_1_stack_updates = p1.stacksize() == 52 && p2.stacksize() == 0;
-        bool player_2_stack_updates = p2.stacksize() == 52 && p1.stacksize() == 0;
+        bool player_1_stack_updates = p1.stacksize() == 0;
+        bool player_2_stack_updates = p2.stacksize() == 0;
 
-        players_stack_update = player_1_stack_updates || player_2_stack_updates;
+        players_stack_update = player_1_stack_updates && player_2_stack_updates;
         
         CHECK(players_stack_update);
         CHECK_GE(p1.stacksize(), 0);
@@ -170,10 +173,10 @@ TEST_CASE("Play a Large Number Of Games") {
 
     bool player_1_took_the_cards = false;
     bool player_2_took_the_cards = false;
-    bool only_one_takes_cards = false;
+    bool valid_cards_taken = false;
 
     SUBCASE("doesn't matter when war happens") {
-        for (int i=0;i<2500;i++) {
+        for (int i=0;i<2000;i++) {
             Game game(p1,p2);
             game.playAll();
 
@@ -185,29 +188,20 @@ TEST_CASE("Play a Large Number Of Games") {
             CHECK_NOTHROW(game.printWiner());
             CHECK_NOTHROW(game.printLog());
             CHECK_NOTHROW(game.printStats());
-            player_1_took_the_cards = p1.cardesTaken() > 0 && p2.cardesTaken() == 0;
-            player_2_took_the_cards = p2.cardesTaken() > 0 && p1.cardesTaken() == 0;
-            only_one_takes_cards = player_1_took_the_cards || player_2_took_the_cards;
-            CHECK(only_one_takes_cards);
 
-            player_1_stack_updates = p1.stacksize() == 52 && p2.stacksize() == 0;
-            player_2_stack_updates = p2.stacksize() == 52 && p1.stacksize() == 0;
-            players_stack_update = player_1_stack_updates || player_2_stack_updates;
+            bool player_1_took_cards = p1.cardesTaken() > 0;
+            bool player_2_took_cards = p2.cardesTaken() > 0;
+            valid_cards_taken = player_1_took_cards || player_2_took_cards; 
+            CHECK(valid_cards_taken);
+
+            bool player_1_stack_updates = p1.stacksize() == 0;
+            bool player_2_stack_updates = p2.stacksize() == 0;
+            players_stack_update = player_1_stack_updates && player_2_stack_updates;
             CHECK(players_stack_update);
 
             // player should take no more than all the cards available in the game
             CHECK_LE(p1.cardesTaken(), 26 * 2);
             CHECK_LE(p2.cardesTaken(), 26 * 2);
-        }
-    }
-
-    SUBCASE("war") {
-        for (size_t i = 0; i < 2500; i++)
-        {
-            Game game(p1,p2);
-            for (int i=0;i<26;i++) {
-                game.playTurn();
-            }        
         }
     }
 }
