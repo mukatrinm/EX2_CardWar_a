@@ -9,11 +9,11 @@ namespace ariel
     private:
 
     public:
-        Player(std::string name);
-        ~Player();
+        Player(std::string name) {};
+        ~Player() {};
 
-        int stacksize();
-        int cardesTaken();
+        int stacksize() {return 0;};
+        int cardesTaken() {return 0;};
     };  
 }
 

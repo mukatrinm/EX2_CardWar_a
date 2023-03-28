@@ -6,8 +6,8 @@ namespace ariel
     {
     private:
     public:
-        card();
-        ~card();
+        card() {};
+        ~card() {};
     };
 } // namespace ariel
 
