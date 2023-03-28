@@ -9,11 +9,11 @@ using namespace ariel;
 /**
  * if we run out of cards, we turn our collected cards face down , shufflle and continue playing.
  * 
- * identical cards of same rank (war), we play 3 cards facedown staggered on top of the face-up card 
+ * identical cards of same rank (war), we play 1 cards facedown staggered on top of the face-up card 
  * then each plaver flips one card face-up
  * * the player with the higher rank wins all the cards in the war including the facedown
  * * if they tie again, another ward
- * * if the player doesn't have three cards to place down because they ran out of cards in their deck and discard then they lose
+ * * if the player doesn't have cards to place down because they ran out of cards in their deck and discard then they lose
  *   the war the first player to collect all the cards in the deck wins.
  */
 
@@ -102,6 +102,9 @@ TEST_CASE("check stacks update") {
     Player p2("Bob");
     Game game(p1,p2);
     bool players_stack_update = false;
+    bool end_turn_condition = false;
+    bool normal_turn_condition = false;
+    bool last_war_condition = false;
 
     SUBCASE("Play One Turn") {
         game.playTurn();
@@ -112,9 +115,21 @@ TEST_CASE("check stacks update") {
         players_stack_update = player_1_stack_updates && player_2_stack_updates;
         
         CHECK(players_stack_update);
-        CHECK(p1.stacksize() == p2.stacksize());
         CHECK_GE(p1.stacksize(), 0);
         CHECK_GE(p2.stacksize(), 0);
+
+        // edge case if one of the players has 3 cards left and the other has 2 or 1 card
+        // left and they get a war, then one of the players will have 1 card left
+        // while the other player has no cards.
+        normal_turn_condition = p1.stacksize() == p2.stacksize();
+        last_war_condition = (p1.stacksize() <= 2 && p2.stacksize() == 0) || (p2.stacksize() <= 2 && p1.stacksize() == 0);
+        end_turn_condition = normal_turn_condition || last_war_condition;
+        CHECK(end_turn_condition);
+
+        // new_stacksize = prev_sacksize - total cards thrown
+        if (p1.cardesTaken() != 26 || p2.cardesTaken() != 26) {
+            CHECK(p1.stacksize() == 26 - (p1.cardesTaken() + p2.cardesTaken()));
+        }
     }
 
     SUBCASE("Play Multiple Turns") {
@@ -128,9 +143,16 @@ TEST_CASE("check stacks update") {
         players_stack_update = player_1_stack_updates && player_2_stack_updates;
         
         CHECK(players_stack_update);
-        CHECK(p1.stacksize() == p2.stacksize());
         CHECK_GE(p1.stacksize(), 0);
         CHECK_GE(p2.stacksize(), 0);
+
+        // edge case if one of the players has 3 cards left and the other has 2 or 1 card
+        // left and they get a war, then one of the players will have 1 card left
+        // while the other player has no cards.
+        normal_turn_condition = p1.stacksize() == p2.stacksize();
+        last_war_condition = (p1.stacksize() <= 1 && p2.stacksize() == 0) || (p2.stacksize() <= 1 && p1.stacksize() == 0);
+        end_turn_condition = normal_turn_condition || last_war_condition;
+        CHECK(end_turn_condition);
     }
 
     SUBCASE("Play All") {
@@ -143,6 +165,14 @@ TEST_CASE("check stacks update") {
         CHECK(players_stack_update);
         CHECK_GE(p1.stacksize(), 0);
         CHECK_GE(p2.stacksize(), 0);
+
+        // edge case if one of the players has 3 cards left and the other has 2 or 1 card
+        // left and they get a war, then one of the players will have 1 card left
+        // while the other player has no cards.
+        normal_turn_condition = p1.stacksize() == 0 && p2.stacksize() == 0;
+        last_war_condition = (p1.stacksize() <= 2 && p2.stacksize() == 0) || (p2.stacksize() <= 2 && p1.stacksize() == 0);
+        end_turn_condition = normal_turn_condition || last_war_condition;
+        CHECK(end_turn_condition);
     }
 }
 
