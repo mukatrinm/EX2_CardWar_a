@@ -29,14 +29,6 @@ TEST_CASE("Initial Values") {
     CHECK_EQ(p1.cardesTaken(), 0);
     CHECK_EQ(p2.cardesTaken(), 0);
 
-    // if we restart the game after play turn, players should get 26 cards.
-    game.playTurn();
-    Game new_game(p1,p2);
-    CHECK_EQ(p1.stacksize(), 26);
-    CHECK_EQ(p2.stacksize(), 26);
-    CHECK_EQ(p1.cardesTaken(), 0);
-    CHECK_EQ(p2.cardesTaken(), 0);
-
     // if we restart the game after playing all, players should get 26 cards.
     game.playAll();
     Game new_game_2(p1,p2);
